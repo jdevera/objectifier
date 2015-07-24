@@ -1,5 +1,12 @@
 import json
 
+# Import yaml if available
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
+
 try:
     import xml.etree.cElementTree as ElementTree
 except ImportError:
@@ -60,6 +67,14 @@ def parse_as_json(data):
     except ValueError:
         return None
 
+def parse_as_yaml(data):
+    if yaml is None:
+        return None
+    try:
+        return yaml.load(data)
+    except yaml.YAMLError:
+        return None
+
 def parse_as_xml(data):
     try:
         return arrayify_xml(data)
@@ -79,6 +94,8 @@ class Objectifier(object):
                 self.response_data = response_data
             return
         if self._try_parsing(response_data, parse_as_json):
+            return
+        if self._try_parsing(response_data, parse_as_yaml):
             return
         if self._try_parsing(response_data, parse_as_xml):
             return
