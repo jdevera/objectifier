@@ -76,11 +76,11 @@ class Objectifier(object):
         return True
 
     @staticmethod
-    def objectify_if_needed(response_data):
+    def _objectify_if_needed(response_data):
         """
         Returns an objectifier object to wrap the provided response_data.
         """
-        if hasattr(response_data, 'pop'):
+        if hasattr(response_data, 'pop'): # In other words, if this is a list
             return Objectifier(response_data)
         return response_data
 
@@ -112,23 +112,23 @@ class Objectifier(object):
         """
         try:
             for k, v in self.response_data.iteritems():
-                yield (k, Objectifier.objectify_if_needed(v))
+                yield (k, Objectifier._objectify_if_needed(v))
         except AttributeError:
             try:
                 for i in self.response_data:
-                    yield Objectifier.objectify_if_needed(i)
+                    yield Objectifier._objectify_if_needed(i)
             except TypeError:
                 raise StopIteration
 
     def __getitem__(self, k):
         try:
-            return Objectifier.objectify_if_needed(self.response_data[k])
+            return Objectifier._objectify_if_needed(self.response_data[k])
         except TypeError:
             return None
 
     def __getattr__(self, k):
         if k in self.response_data:
-            return Objectifier.objectify_if_needed(self.response_data[k])
+            return Objectifier._objectify_if_needed(self.response_data[k])
         return None
 
 
