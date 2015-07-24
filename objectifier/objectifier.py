@@ -53,6 +53,18 @@ def is_list_of_2_element_tuples(input):
 
     return True
 
+def parse_as_json(data):
+    try:
+        # Assume the data is JSON
+        return json.loads(data)
+    except ValueError:
+        return None
+
+def parse_as_xml(data):
+    try:
+        return arrayify_xml(data)
+    except ElementTree.ParseError:
+        return None
 
 class Objectifier(object):
     def __init__(self, response_data):
@@ -61,20 +73,19 @@ class Objectifier(object):
                 self.response_data = dict(response_data)
             else:
                 self.response_data = response_data
-        else:
-            try:
-                # Assume the data is JSON
-                self.response_data = json.loads(response_data)
-            except ValueError:
-                try:
-                    # A JSON object couldn't be found, so try to parse the data
-                    # as XML
-                    self.response_data = arrayify_xml(response_data)
-                except ElementTree.ParseError:
-                    self.response_data = response_data
-            except TypeError:
-                self.response_data = response_data
+            return
+        if self._try_parsing(response_data, parse_as_json):
+            return
+        if self._try_parsing(response_data, parse_as_xml):
+            return
+        self.response_data = response_data
 
+    def _try_parsing(self, data, parser_function):
+        try:
+            self.response_data = parser_function(data)
+        except:
+            return False
+        return self.response_data is not None
 
 
     @staticmethod
