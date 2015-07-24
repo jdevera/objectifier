@@ -68,6 +68,10 @@ def parse_as_xml(data):
 
 class Objectifier(object):
     def __init__(self, response_data):
+        # self.response_data = None
+        if type(response_data) == dict:
+            self.response_data = response_data
+            return
         if type(response_data) == list:
             if is_list_of_2_element_tuples(response_data):
                 self.response_data = dict(response_data)
